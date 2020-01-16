@@ -1,5 +1,6 @@
 let tempMas = [];
-let countCheck = 0 , checkDelta;
+let countCheck = 0,
+    checkDelta;
 
 function addTemp(mas, length) {
     for (let i = 0; i < length * 2; i++) {
@@ -43,12 +44,12 @@ class GenAlgoritm {
         let flag = true;
         let iter = 0;
         mas.forEach((el, ind) => {
-            if (ind % 2 !== 0 ){                 
-                if( (el / 2) + mas[ind - 1] > this.testMas[iter]){
-                    flag = false;  
-                }   
-                iter++;           
-            } else if (ind % 2 === 0 && el > this.testMas[iter] )
+            if (ind % 2 !== 0) {
+                if ((el / 2) + mas[ind - 1] > this.testMas[iter]) {
+                    flag = false;
+                }
+                iter++;
+            } else if (ind % 2 === 0 && el > this.testMas[iter])
                 flag = false;
         })
         return flag;
@@ -61,16 +62,16 @@ class GenAlgoritm {
                 thruster: [],
                 delta_velocity: undefined
             };
-            let mas = JSON.parse(JSON.stringify(tempMas));            
+            let mas = JSON.parse(JSON.stringify(tempMas));
             while (pts.thruster.length < this.countGen) {
                 let index = +(Math.random() * mas.length - 1).toFixed();
-                if(index < 0) index++;                
+                if (index < 0) index++;
                 let temp = mas.splice(index, 1)[0];
-                pts.thruster.push(temp);                
+                pts.thruster.push(temp);
             }
-            if(this.checkAgentGen(pts.thruster))
+            if (this.checkAgentGen(pts.thruster))
                 this.agents.push(pts);
-             this.measureAgentAll();   
+            this.measureAgentAll();
         }
     };
 
@@ -98,11 +99,11 @@ class GenAlgoritm {
         }
     }
 
-   
+
 
     addMutant(agentIndex) {
-        let newAgent ;
-        while(true) {
+        let newAgent;
+        while (true) {
             let index1 = Math.floor(Math.random() * this.countGen);
             let index2 = Math.floor(Math.random() * this.countGen);
             newAgent = JSON.parse(JSON.stringify(this.agents[agentIndex]));
@@ -110,7 +111,7 @@ class GenAlgoritm {
             newAgent.thruster[index1] = newAgent.thruster[index2];
             newAgent.thruster[index2] = temp;
             newAgent.delta_velocity = undefined;
-            if(this.checkAgentGen(newAgent.thruster)) break;
+            if (this.checkAgentGen(newAgent.thruster)) break;
         }
         this.agents.push(newAgent);
         this.checkAgentGen(newAgent.thruster)
@@ -125,13 +126,13 @@ class GenAlgoritm {
         let mas = JSON.parse(JSON.stringify(tempMas));
         while (child.thruster.length < this.countGen) {
             let parentIndex = Math.floor(Math.random() * 2);
-            let genIndex = Math.floor(Math.random() * this.countGen);                        
-            if (mas.includes(this.agents[pts[parentIndex]].thruster[genIndex])) { 
+            let genIndex = Math.floor(Math.random() * this.countGen);
+            if (mas.includes(this.agents[pts[parentIndex]].thruster[genIndex])) {
 
                 child.thruster.push(mas.splice(mas.indexOf(this.agents[pts[parentIndex]].thruster[genIndex]), 1)[0]);
             }
         }
-       if(this.checkAgentGen(child.thruster)) 
+        if (this.checkAgentGen(child.thruster))
             this.agents.push(child);
     }
 
@@ -145,32 +146,17 @@ class GenAlgoritm {
 function checkRes(popGen) {
 
     let flag = true;
-    if(checkDelta === popGen[0].delta_velocity){
+    if (checkDelta === popGen[0].delta_velocity) {
         countCheck++
-        if(countCheck >= popGen.length)
+        if (countCheck >= popGen.length)
             flag = false;
     } else {
         checkDelta = popGen[0].delta_velocity;
         countCheck = 0;
-    }    
+    }
     return flag;
 }
 
-function assemblyResObject(res){
-    let temp = {
-        main_thruster: [],
-        secondary_thruster :[] ,
-        delta_velocity: res.delta_velocity
-    };
-    res.thruster.forEach((el,ind)=>{
-        if(ind%2===0)
-           temp.main_thruster.push(el);
-        else
-            temp.secondary_thruster.push(el);
-
-    })
-    return temp;
-};
 
 const algorithmGen = function (arrCorrections, arrCells) {
 
@@ -182,9 +168,8 @@ const algorithmGen = function (arrCorrections, arrCells) {
             gA.stepGa();
             if (gA.numGn > 1000)
                 break;
-        }        
-        console.log( assemblyResObject(gA.agents[0]));
-        return assemblyResObject(gA.agents[0]);
+        }
+        return gA.agents[0];
     } catch (er) {
         console.log(er);
     }

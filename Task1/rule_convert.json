@@ -1,0 +1,31 @@
+
+[
+        {
+            "unit": "km",
+            "coefficient": "1000"
+        },
+        {
+            "unit": "m",
+            "coefficient": "1"
+        },
+        {
+            "unit": "cm",
+            "coefficient": "0.01"
+        },
+        {
+            "unit": "mm",
+            "coefficient": "0.001"
+        },
+        {
+            "unit": "yd",
+            "coefficient": "0.9144"
+        },
+        {
+            "unit": "in",
+            "coefficient": "0.0254"
+        },
+        {
+            "unit": "ft",
+            "coefficient": "0.3048"
+        }
+]
