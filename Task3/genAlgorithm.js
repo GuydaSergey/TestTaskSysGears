@@ -1,7 +1,7 @@
 let tempMas = [];
 let countCheck = 0,
     checkDelta;
-
+// Метод заполнения значений капсул в массив и добавление недостаюших (заполняются 0)
 function addTemp(mas, length) {
     for (let i = 0; i < length * 2; i++) {
         if (i < mas.length)
@@ -20,7 +20,7 @@ class GenAlgoritm {
         this.numGn = 0;
         this.testMas = arrCorrections;
     };
-
+    // Повторяющийся шаг работы алгоритма (Удаление , Мутация , Подсчет )
     stepGa() {
 
         this.remoweWeakest(Math.ceil(this.popMaxSize / 2));
@@ -39,7 +39,7 @@ class GenAlgoritm {
         }
         this.measureAgentAll();
     }
-
+    // Проверка значений капсул в особи на соблюдение всех условий задачи. 
     checkAgentGen(mas) {
         let flag = true;
         let iter = 0;
@@ -55,7 +55,11 @@ class GenAlgoritm {
         return flag;
     }
 
-
+    /*  Инициализация создание особей и заполнение популяции
+        Особь - объект с свойствами :
+            thruster - массив значений капсул размер равен размеру маневров умноженых на количество двигателей.
+            delta_velocity - итоговое полученное приращение скорости в данном решении (особи).
+    */ 
     initAgent() {
         while (this.agents.length < this.popMaxSize) {
             let pts = {
@@ -74,7 +78,7 @@ class GenAlgoritm {
             this.measureAgentAll();
         }
     };
-
+    // Подсчет итоговое полученное приращение скорости у особи.
     measureAgent(agentIndex) {
         let pts = this.agents[agentIndex];
         this.agents[agentIndex].delta_velocity = pts.thruster.reduce(function (sum, cur, ind) {
@@ -90,7 +94,7 @@ class GenAlgoritm {
             this.measureAgent(k);
         this.sortAgent();
     }
-
+    // Отбор - удаление слабых особей (неудачных решений). 
     remoweWeakest(WN) {
         this.measureAgentAll();
         while (this.agents.length > 0 && WN > 0) {
@@ -98,9 +102,7 @@ class GenAlgoritm {
             this.agents.pop();
         }
     }
-
-
-
+    // Мутация механизм изменения особи (перемешение значений капсул ) 
     addMutant(agentIndex) {
         let newAgent;
         while (true) {
@@ -116,7 +118,7 @@ class GenAlgoritm {
         this.agents.push(newAgent);
         this.checkAgentGen(newAgent.thruster)
     }
-
+    // Мутация - парождение патомков из двух рандомно выбраных особей .
     addChild(indexAgent1, indexAgent2) {
         let pts = [indexAgent1, indexAgent2];
         let child = {
@@ -135,14 +137,14 @@ class GenAlgoritm {
         if (this.checkAgentGen(child.thruster))
             this.agents.push(child);
     }
-
+    // Сортировка популяции так что-бы сильные особи были в начале популяции( масиве ).
     sortAgent() {
         this.agents.sort(function (a, b) {
             return b.delta_velocity - a.delta_velocity;
         });
     }
 }
-
+//Проверка и подсчет повтореный самых удачных решшений для остановки работы алгоритма 
 function checkRes(popGen) {
 
     let flag = true;
