@@ -1,18 +1,23 @@
 let tempMas = [];
+let countCheck = 0 , checkDelta;
 
-function addTemp(count) {
-    for (let i = 0; i < count; i++)
-        tempMas.push(i + 1);
+function addTemp(mas, length) {
+    for (let i = 0; i < length * 2; i++) {
+        if (i < mas.length)
+            tempMas.push(mas[i]);
+        else
+            tempMas.push(0);
+    }
 }
 
 class GenAlgoritm {
 
-    constructor(mas) {
-        this.countGen = mas.length;
-        this.popMaxSize = mas.length;
+    constructor(arrCorrections) {
+        this.countGen = arrCorrections.length * 2;
+        this.popMaxSize = 25;
         this.agents = [];
         this.numGn = 0;
-        this.provMas = mas;
+        this.testMas = arrCorrections;
     };
 
     stepGa() {
@@ -34,32 +39,48 @@ class GenAlgoritm {
         this.measureAgentAll();
     }
 
+    checkAgentGen(mas) {
+        let flag = true;
+        let iter = 0;
+        mas.forEach((el, ind) => {
+            if (ind % 2 !== 0 ){                 
+                if( (el / 2) + mas[ind - 1] > this.testMas[iter]){
+                    flag = false;  
+                }   
+                iter++;           
+            } else if (ind % 2 === 0 && el > this.testMas[iter] )
+                flag = false;
+        })
+        return flag;
+    }
+
 
     initAgent() {
         while (this.agents.length < this.popMaxSize) {
-            let pts = [];
-            let mas = JSON.parse(JSON.stringify(tempMas));
-            while (pts.length < this.countGen) {
-                let temp = [];
-                while (temp.length === 0) {
-
-                    let index = +(Math.random() * 11 ).toFixed();
-                    temp = mas.splice(index, 1);
-                }
-                pts.push(temp.pop());
+            let pts = {
+                thruster: [],
+                delta_velocity: undefined
+            };
+            let mas = JSON.parse(JSON.stringify(tempMas));            
+            while (pts.thruster.length < this.countGen) {
+                let index = +(Math.random() * mas.length - 1).toFixed();
+                if(index < 0) index++;                
+                let temp = mas.splice(index, 1)[0];
+                pts.thruster.push(temp);                
             }
-
-            this.agents.push({p: pts, size: 0});
+            if(this.checkAgentGen(pts.thruster))
+                this.agents.push(pts);
+             this.measureAgentAll();   
         }
     };
 
     measureAgent(agentIndex) {
-        let pts = this.agents[agentIndex].p;
-        this.agents[agentIndex].size = this.provMas.reduce(function (sum, cur, ind) {
-            let res = cur - pts[ind];
-            if (res < 0)
-                return sum + 0;
-            return sum + res;
+        let pts = this.agents[agentIndex];
+        this.agents[agentIndex].delta_velocity = pts.thruster.reduce(function (sum, cur, ind) {
+            if (ind % 2 === 0)
+                return sum + cur;
+            else
+                return sum + cur / 2;
         }, 0);
     }
 
@@ -77,68 +98,93 @@ class GenAlgoritm {
         }
     }
 
+   
+
     addMutant(agentIndex) {
-
-        let index1 = Math.floor(Math.random() * this.countGen);
-        let index2 = Math.floor(Math.random() * this.countGen);
-
-        let newAgent = JSON.parse(JSON.stringify(this.agents[agentIndex]));
-        let temp = newAgent.p[index1];
-        newAgent.p[index1] = newAgent.p[index2];
-        newAgent.p[index2] = temp;
-        newAgent.size = undefined;
+        let newAgent ;
+        while(true) {
+            let index1 = Math.floor(Math.random() * this.countGen);
+            let index2 = Math.floor(Math.random() * this.countGen);
+            newAgent = JSON.parse(JSON.stringify(this.agents[agentIndex]));
+            let temp = newAgent.thruster[index1];
+            newAgent.thruster[index1] = newAgent.thruster[index2];
+            newAgent.thruster[index2] = temp;
+            newAgent.delta_velocity = undefined;
+            if(this.checkAgentGen(newAgent.thruster)) break;
+        }
         this.agents.push(newAgent);
+        this.checkAgentGen(newAgent.thruster)
     }
 
     addChild(indexAgent1, indexAgent2) {
         let pts = [indexAgent1, indexAgent2];
-        let child = {p: [], size: undefined};
-        while (child.p.length < this.countGen) {
+        let child = {
+            thruster: [],
+            delta_velocity: undefined
+        };
+        let mas = JSON.parse(JSON.stringify(tempMas));
+        while (child.thruster.length < this.countGen) {
             let parentIndex = Math.floor(Math.random() * 2);
-            let genIndex = Math.floor(Math.random() * this.countGen);
-            if (!child.p.includes(this.agents[pts[parentIndex]].p[genIndex])) {
-                child.p.push(this.agents[pts[parentIndex]].p[genIndex]);
+            let genIndex = Math.floor(Math.random() * this.countGen);                        
+            if (mas.includes(this.agents[pts[parentIndex]].thruster[genIndex])) { 
+
+                child.thruster.push(mas.splice(mas.indexOf(this.agents[pts[parentIndex]].thruster[genIndex]), 1)[0]);
             }
         }
-
-        this.agents.push(child);
+       if(this.checkAgentGen(child.thruster)) 
+            this.agents.push(child);
     }
 
     sortAgent() {
         this.agents.sort(function (a, b) {
-            return a.size - b.size
+            return b.delta_velocity - a.delta_velocity;
         });
     }
 }
 
-function provRes(popGen, provMas) {
+function checkRes(popGen) {
 
     let flag = true;
-    let prov = provMas.reduce(function (sum, curr) {
-            return sum + curr;
-        }, 0) - 55;
-
-    popGen.forEach(function (i) {
-        if (i.size === prov) {
+    if(checkDelta === popGen[0].delta_velocity){
+        countCheck++
+        if(countCheck >= popGen.length)
             flag = false;
-        }
-    });
+    } else {
+        checkDelta = popGen[0].delta_velocity;
+        countCheck = 0;
+    }    
     return flag;
 }
 
+function assemblyResObject(res){
+    let temp = {
+        main_thruster: [],
+        secondary_thruster :[] ,
+        delta_velocity: res.delta_velocity
+    };
+    res.thruster.forEach((el,ind)=>{
+        if(ind%2===0)
+           temp.main_thruster.push(el);
+        else
+            temp.secondary_thruster.push(el);
 
-const algorithmGen = function (mas) {
+    })
+    return temp;
+};
+
+const algorithmGen = function (arrCorrections, arrCells) {
 
     try {
-        addTemp(mas.length);
-        let gA = new GenAlgoritm(mas);
+        addTemp(arrCells, arrCorrections.length)
+        let gA = new GenAlgoritm(arrCorrections);
         gA.initAgent();
-        while (provRes(gA.agents, mas)) {
-            if (gA.numGn > 100)
-                break;
+        while (checkRes(gA.agents)) {
             gA.stepGa();
-        }
-        console.log(gA.agents[0].p);
+            if (gA.numGn > 1000)
+                break;
+        }        
+        console.log( assemblyResObject(gA.agents[0]));
+        return assemblyResObject(gA.agents[0]);
     } catch (er) {
         console.log(er);
     }

@@ -1,0 +1,23 @@
+{
+  "name": "TestTaskSysGears",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GuydaSergey/TestTaskSysGears.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GuydaSergey/TestTaskSysGears/issues"
+  },
+  "homepage": "https://github.com/GuydaSergey/TestTaskSysGears#readme",
+  "dependencies": {
+    "jakes-gordon-growing-packer": "^0.1.0"
+  }
+}
